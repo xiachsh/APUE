@@ -1,8 +1,48 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "bqueue.h"
 
+bQueue q = NULL;
+
+void thread_put()
+{
+	printf("Sleep for 10 second before put 16 items \n");
+	sleep(10);
+	int i = 0;
+	for (i=0;i<16;i++)
+	{
+		bqueue_put(q,&i,sizeof(int));
+	}
+
+
+	printf("Sleep for 10 second before put 128 items \n");
+	sleep(10);
+	for (i=0;i<128;i++)
+	{
+		bqueue_put(q,&i,sizeof(int));
+	}
+
+
+}
+void thread_get()
+{
+	int i = 0;
+	int * tmp = NULL;
+	for (i=0;i<16;i++)
+	{
+		printf("Get iteration :%d",i);
+		tmp = (int * ) bqueue_get(q);
+		if (tmp)
+		{
+			printf(" : %d\n",*tmp);
+			free(tmp);
+			tmp = NULL;
+		}
+		else
+			printf(" NULL \n");
+	}
+	printf ("task Done for thread_put\n");
+}
 
 int main()
 {
@@ -17,30 +57,15 @@ int main()
 	
 	list_transverse(l,print_int_element);
 	list_destroy(&l);
-
-
-	bQueue q = NULL;
 	bqueue_init(&q,100);
-	int x = 0;
-	for (i=0;i<16;i++)
-	{
-		bqueue_put(q,&i,sizeof(int));
-	}
-	int * tmp = NULL;
-	for (i=0;i<32;i++)
-	{
-		tmp = (int * ) bqueue_get(q);
-		if (tmp)
-		{
-			printf("%d\t",*tmp);
-			free(tmp);
-			tmp = NULL;
-		}
-	}
-	printf("\n");
-		
-		
 
+	pthread_t t1;
+	pthread_t t2;
+	pthread_create(&t1,NULL,thread_put,NULL);		
+	pthread_create(&t2,NULL,thread_get,NULL);		
+
+	pthread_join(t1,NULL);
+	pthread_join(t2,NULL);
 	return 0;
 
 }
