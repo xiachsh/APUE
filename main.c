@@ -11,7 +11,8 @@ void thread_put()
 	int i = 0;
 	for (i=0;i<16;i++)
 	{
-		bqueue_put(q,&i,sizeof(int));
+		char * buffer = "hello world\n";
+		bqueue_put(q,buffer,strlen(buffer)+1);
 	}
 
 
@@ -19,7 +20,8 @@ void thread_put()
 	sleep(10);
 	for (i=0;i<128;i++)
 	{
-		bqueue_put(q,&i,sizeof(int));
+		char * buffer = "hello world\n";
+		bqueue_put(q,buffer,strlen(buffer)+1);
 	}
 
 
@@ -31,10 +33,10 @@ void thread_get()
 	for (i=0;i<16;i++)
 	{
 		printf("Get iteration :%d",i);
-		tmp = (int * ) bqueue_get(q);
+		char * tmp = (char * ) bqueue_get(q);
 		if (tmp)
 		{
-			printf(" : %d\n",*tmp);
+			printf(" : %s",tmp);
 			free(tmp);
 			tmp = NULL;
 		}

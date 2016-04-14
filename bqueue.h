@@ -107,8 +107,15 @@ void bqueue_init(bQueue *q,int max)
 	tmp->size = 0;
 	tmp->l = NULL;
 	pthread_mutex_init(&(tmp->m_size),NULL);
+	
 	pthread_cond_init(&(tmp->c_empty),NULL);
 	pthread_cond_init(&(tmp->c_full),NULL);
+
+	/*
+	tmp->c_empty = PTHREAD_COND_INITIALIZER;
+	tmp->c_full = PTHREAD_COND_INITIALIZER;
+	*/
+
 	list_init(&(tmp->l));
 
 	*q = tmp;
