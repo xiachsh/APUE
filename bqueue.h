@@ -48,6 +48,7 @@ void list_insert_tail(List *l,void * data,int len)
 {
 	ListNode * node = malloc(sizeof(ListNode));
 	node->data = malloc(sizeof(char) * len);
+	node->next = NULL;
 	memcpy(node->data,data,len);
 	
  	List cur = (*l);
@@ -65,18 +66,19 @@ void list_insert_tail(List *l,void * data,int len)
 	}
 }
 
-void list_remove_head(List *l,void * data)
+void * list_remove_head(List *l)
 {
+	void * point ;
 	List node = (*l);
 	if (node)
 	{
-		data = node->data;	
+		point = node->data;	
 		*l = node->next;
 		free(node);
 	}
 	else
-		data = NULL;
-
+		point = NULL;
+	return point;
 
 } 
 void list_transverse(List l,fnt function)
@@ -103,6 +105,7 @@ void bqueue_init(bQueue *q,int max)
 	struct _bqueue * tmp = malloc(sizeof (struct _bqueue) );		
 	tmp->max = max;
 	tmp->size = 0;
+	tmp->l = NULL;
 	pthread_mutex_init(&(tmp->m_size),NULL);
 	pthread_cond_init(&(tmp->c_empty),NULL);
 	pthread_cond_init(&(tmp->c_full),NULL);
@@ -131,16 +134,18 @@ void bqueue_put(bQueue q,void * data,int len)
 	pthread_mutex_unlock(&(q->m_size));
 }
 
-void bqueue_get(bQueue q,void * data)
+void * bqueue_get(bQueue q)
 {
+	void * point ;
 	pthread_mutex_lock(&(q->m_size));
 	if (q->size <= 0)
 		pthread_cond_wait(&(q->c_empty),&(q->m_size));
-	list_remove_head(&(q->l),data);
+	point = list_remove_head(&(q->l));
 	q->size--;
 	if (q->size == ((q->max)-1) )
 		pthread_cond_broadcast(&(q->c_full));
 	pthread_mutex_unlock(&(q->m_size));
+	return point;
 }
 
 

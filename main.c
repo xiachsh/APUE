@@ -22,7 +22,24 @@ int main()
 	bQueue q = NULL;
 	bqueue_init(&q,100);
 	int x = 0;
-	bqueue_get(q,&x);
+	for (i=0;i<16;i++)
+	{
+		bqueue_put(q,&i,sizeof(int));
+	}
+	int * tmp = NULL;
+	for (i=0;i<32;i++)
+	{
+		tmp = (int * ) bqueue_get(q);
+		if (tmp)
+		{
+			printf("%d\t",*tmp);
+			free(tmp);
+			tmp = NULL;
+		}
+	}
+	printf("\n");
+		
+		
 
 	return 0;
 
