@@ -55,24 +55,21 @@ void postorder_iterative_traversal(BstTree tree,int max)
 	BstTree t_arr[max];
 	bzero(t_arr,sizeof(BstTree)*max);
 	BstTree cur = tree;
-	int topDown = 1;
-	while (cur) {
-	while(cur->left && topDown) {
-		t_arr[index++] = cur;
-		cur=cur->left;
-		topDown = 1;
-	}
-	if (!cur->left && !cur->right) {
-		fprintf(stdout,"Address:%8lx Val:%4d Left:%8lx Right:%8lx\n",cur,cur->data,cur->left,cur->right);
-		if (index < 1) break;
-		cur = t_arr[--index];
-		topDown = 0;
-	}
-	else if (cur->right) {
-		t_arr[index++] = cur;
-		cur = cur->right;
-		topDown = 1;
-	}
+	BstTree previsited = NULL;
+	while ( cur != NULL || index >=1 )
+	{
+		while (cur != NULL){
+			t_arr[index++] = cur;
+			cur = cur->left;
+		}
+		cur = t_arr[index-1];
+		if (cur->right == NULL | cur->right == previsited){
+			fprintf(stdout,"Address:%8lx Val:%4d Left:%8lx Right:%8lx\n",cur,cur->data,cur->left,cur->right);	
+			previsited = cur;
+			index--;
+			cur = NULL;	
+		}
+		else cur = cur->right;
 	}
 }
 
