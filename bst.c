@@ -1,46 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
+#include <string.h>
 #include <strings.h>
-
-
-
-#define DEFAULT_ELEMS 16
+#include <getopt.h>
 
 typedef struct _bstNode {
-	int data;
+	int val;
 	struct _bstNode * left;
 	struct _bstNode * right;
-} BstNode, * BstTree;
+} BstNode, *BstTree;
 
 
 
-void bst_insert(BstTree * tPtr,int val)
+void bst_insert(BstTree *tPtr,int val)
 {
-	if ((*tPtr) == NULL) {
-		*tPtr = malloc(sizeof(BstNode));
-		(*tPtr)->data = val;
-		(*tPtr)->left = (*tPtr)->right = NULL;
+ 	if (!*tPtr) {
+		BstTree tree = *tPtr = malloc(sizeof(BstNode));
+		tree->val = val;
+		tree->left = tree->right = NULL;
 	}
-	else if ((*tPtr)->data > val) 
-		bst_insert(&((*tPtr)->left),val);
-	else if ((*tPtr)->data < val) 
-		bst_insert(&((*tPtr)->right),val);
-	else {
-		fprintf(stderr,"duplicat key %d,Skipped\n",val);
+	else if((*tPtr)->val > val) {
+		bst_insert( &((*tPtr)->left),val);
 	}
+	else if ((*tPtr)->val < val) {
+		bst_insert( &((*tPtr)->right),val);
+	}
+	else 
+		fprintf(stderr,"Duplicate key :%d\n",val);
 }
 
-void delete_key(BstTree * tPtr,int key)
+void bst_destroy(BstTree *tPtr)
 {
-
-
-}
-
-void bst_destroy(BstTree * tPtr)
-{
-	if (*tPtr){
+	if (*tPtr) {
 		bst_destroy(&((*tPtr)->left));
 		bst_destroy(&((*tPtr)->right));
 		free(*tPtr);
@@ -48,107 +40,128 @@ void bst_destroy(BstTree * tPtr)
 	}
 }
 
-
-void postorder_iterative_traversal(BstTree tree,int max)
-{
-	int index = 0;
-	BstTree t_arr[max];
-	bzero(t_arr,sizeof(BstTree)*max);
-	BstTree cur = tree;
-	BstTree previsited = NULL;
-	while ( cur != NULL || index >=1 )
-	{
-		while (cur != NULL){
-			t_arr[index++] = cur;
-			cur = cur->left;
-		}
-		cur = t_arr[index-1];
-		if (cur->right == NULL | cur->right == previsited){
-			fprintf(stdout,"Address:%8lx Val:%4d Left:%8lx Right:%8lx\n",cur,cur->data,cur->left,cur->right);	
-			previsited = cur;
-			index--;
-			cur = NULL;	
-		}
-		else cur = cur->right;
-	}
-}
-
-void preorder_iterative_traversal(BstTree tree,int max)
-{
-	int index = 0 ;
-	BstTree t_arr[max];
-	bzero(t_arr,sizeof(BstTree)*max);
-	BstTree cur = tree;
-	
-	while ( cur ) {
-		fprintf(stdout,"Address:%8lx Val:%4d Left:%8lx Right:%8lx\n",cur,cur->data,cur->left,cur->right);	
-		if (cur->right) t_arr[index++] = cur->right;
-		if (cur->left)  {
-			cur = cur->left;
-			continue;
-		}
-		else {
-			if (index<1)  break;
- 	                cur = t_arr[--index];
-                }
-	}
-}
-
-void inorder_iterative_traversal(BstTree tree,int max)
-{
-	int index = 0 ;
-	BstTree t_arr[max];
-	bzero(t_arr,sizeof(BstTree)*max);
-	BstTree cur = tree;
-	int topDown = 1;
-
-	while (cur || index>=1) {
-		while (cur && topDown) {
-			t_arr[index++] = cur;
-			cur = cur->left;
-			 topDown = 1;	
-		}
-		if (index<1) break;
-		cur = t_arr[--index];
-		fprintf(stdout,"Address:%8lx Val:%4d Left:%8lx Right:%8lx\n",cur,cur->data,cur->left,cur->right);	
-                if (cur->right) {
-			cur=cur->right;
-			topDown = 1;
-			continue;
-		}
-		topDown = 0;
-	}
-}
-
-
-
-void inorder_recursive_traversal(BstTree tree)
+void inOrder_traversal(BstTree tree)
 {
 	if (tree) {
-		inorder_recursive_traversal(tree->left);
-		fprintf(stdout,"Address:%8lx Val:%4d Left:%8lx Right:%8lx\n",tree,tree->data,tree->left,tree->right);	
-		inorder_recursive_traversal(tree->right);
+		inOrder_traversal(tree->left);	
+		fprintf(stdout,"Address:%8lx Val:%4d Left:%8lx Right:%8lx\n",tree,tree->val,tree->left,tree->right);
+		inOrder_traversal(tree->right);	
 	}
 }
+
+
+void postOrder_traversal_i(BstTree tree,int max)
+{
+	int index = 0 ;
+	BstTree cur = tree;
+	BstTree tPtr_arr[max];
+	bzero(tPtr_arr,sizeof(BstTree)*max);
+	BstTree previsited = NULL;	
+
+	while (cur || index >=1) {
+		if (cur){
+			tPtr_arr[index++] = cur;
+			cur=cur->left;
+		}
+		else {
+			cur = tPtr_arr[index-1];
+			if (cur->right == NULL || cur->right == previsited){
+			fprintf(stdout,"Address:%8lx Val:%4d Left:%8lx Right:%8lx\n",cur,cur->val,cur->left,cur->right);
+			index--;
+			previsited = cur;
+			cur = NULL;
+			}
+			else 
+				cur = cur->right;
+		}
+	}	
+}
+
+void preOrder_traversal_i(BstTree tree,int max)
+{
+	int index = 0;
+	BstTree cur = tree;
+	BstTree tPtr_arr[max];
+	
+
+	while (cur || index>=1) {
+		
+		if (!cur) 
+			cur = tPtr_arr[--index];
+		fprintf(stdout,"Address:%8lx Val:%4d Left:%8lx Right:%8lx\n",cur,cur->val,cur->left,cur->right);
+		if (cur->right)
+			tPtr_arr[index++] = cur->right;
+		cur = cur->left;
+	}
+}
+
+void inOrder_traversal_i(BstTree tree,int max)
+{
+	int index = 0;
+	BstTree tPtr_arr[max];
+	BstTree cur = tree;
+
+	while (cur || index >=1 ){
+		if (cur) {
+			tPtr_arr[index++] = cur;
+			cur = cur->left;
+		} 
+		else {
+			cur = tPtr_arr[--index];	
+			fprintf(stdout,"Address:%8lx Val:%4d Left:%8lx Right:%8lx\n",cur,cur->val,cur->left,cur->right);
+			cur = cur->right;
+		}
+	}	
+}
+
+void bfs(BstTree tree,int max)
+{
+	int index = 0 ;
+	int len = 0;
+	BstTree tPtr_arr[max];
+	BstTree tmp;
+	bzero(tPtr_arr,sizeof(BstTree) * max);
+	tPtr_arr[index++]=tree;
+	len = 1;
+
+	int cur_pos = 0;
+	while (len >= 1) {
+		tmp = tPtr_arr[cur_pos++];
+		len--;
+		fprintf(stdout,"Address:%8lx Val:%4d Left:%8lx Right:%8lx\n",tmp,tmp->val,tmp->left,tmp->right);
+		if (tmp->left) {
+			tPtr_arr[index++]=tmp->left;
+			len++;
+		}
+		if (tmp->right) {
+			tPtr_arr[index++]=tmp->right;
+			len++;
+		}
+	}
+}
+
+
 
 void usage(int argc,char ** argv)
 {
-	fprintf(stderr,"%s Usage:\n",argv[0]);
-	fprintf(stderr,"	:%s -n num    num | num of elements\n",argv[0]);
+	fprintf(stderr,"%s usage\n",argv[0]);
+	fprintf(stderr,"	%s -n num\n",argv[0]);
 	exit(1);
 }
 
+
 int main(int argc,char ** argv)
 {
-	int c = 0;
-	int num ;
-	int i ;
+	int num;
 	BstTree tree = NULL;
-	if (argc == 1) usage(argc,argv);
-	while( (c=getopt(argc,argv,"n:")) != -1 ) {
-		switch (c) {
-			case 'n':
-				if (!isdigit(optarg[0]))
+	int c;
+	int i;
+	if (argc==1)
+		usage(argc,argv);		
+	while((c=getopt(argc,argv,"n:")) != -1){
+		switch(c){
+			case 'n': 
+				if (!isdigit(optarg[0])) 
 					usage(argc,argv);
 				num = atoi(optarg);
 				break;
@@ -157,16 +170,18 @@ int main(int argc,char ** argv)
 				break;
 		}
 	}
-
-	for (i=0;i<num;i++) 
-		bst_insert(&tree,rand()%1000);
-	inorder_recursive_traversal(tree);
-	fprintf(stdout,"beatiful seperator LOL\n");
-	inorder_iterative_traversal(tree,num);
-	fprintf(stdout,"beatiful seperator LOL\n");
-	preorder_iterative_traversal(tree,num);
-	fprintf(stdout,"beatiful seperator LOL\n");
-	postorder_iterative_traversal(tree,num);
-	bst_destroy(&tree);	
-
-} 
+	
+	for (i=0;i<num;i++)
+		bst_insert(&tree,rand() % 1000);
+        inOrder_traversal(tree);		
+	fprintf(stdout,"beautifull seperator \n");
+        inOrder_traversal_i(tree,num);		
+	fprintf(stdout,"beautifull seperator \n");
+        preOrder_traversal_i(tree,num);		
+	fprintf(stdout,"beautifull seperator \n");
+	postOrder_traversal_i(tree,num);
+	fprintf(stdout,"beautifull seperator \n");
+	bfs(tree,num);
+	bst_destroy(&tree);
+	return 0 ;
+}
