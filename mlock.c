@@ -10,6 +10,12 @@
 
 #define SIZE 1024
 
+
+
+
+/* 
+	we also can use call madvise to ping memory
+*/
 int main()
 {
 	int ret = 0 ;
